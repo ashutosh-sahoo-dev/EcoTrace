@@ -1,0 +1,5 @@
+Django>=5.2,<7.0
+python-dotenv>=1.0,<2.0
+ibm-watsonx-ai>=1.3,<2.0
+#ashuabhi07 password
+#username: Ashutosh

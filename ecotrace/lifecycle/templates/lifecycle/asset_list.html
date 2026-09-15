@@ -1,0 +1,92 @@
+{% extends "lifecycle/base.html" %}
+{% block title %}EcoTrace — Lifecycle Passports{% endblock %}
+
+{% block content %}
+<div class="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+    <div>
+        <div class="mb-3 inline-flex rounded-full bg-emerald-50 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">Digital inventory</div>
+        <h1 class="text-4xl font-black tracking-tight text-slate-950">Lifecycle Passports</h1>
+        <p class="mt-2 text-slate-500">Search, filter and inspect the AI rationale behind registered campus devices.</p>
+    </div>
+    <a href="{% url 'add_asset' %}" class="rounded-2xl bg-emerald-600 px-5 py-3 text-center text-sm font-black text-white shadow-lg shadow-emerald-600/20 hover:bg-emerald-700">+ Register Asset</a>
+</div>
+
+<div class="mb-6 rounded-3xl bg-white p-5 shadow-soft">
+    <form method="get" class="grid gap-3 md:grid-cols-[1fr_210px_190px_auto]">
+        <input class="form-input" type="search" name="q" value="{{ query }}" placeholder="Search asset ID, device name...">
+        <select class="form-input" name="device_type">
+            <option value="">All device types</option>
+            {% for value, label in device_types %}
+                <option value="{{ value }}" {% if selected_device_type == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <select class="form-input" name="status">
+            <option value="">All statuses</option>
+            {% for value, label in statuses %}
+                <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button class="rounded-xl bg-slate-950 px-6 py-3 font-black text-white hover:bg-slate-800">Filter</button>
+    </form>
+</div>
+
+<div class="overflow-hidden rounded-3xl bg-white shadow-soft">
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[1050px] text-left">
+            <thead class="bg-slate-50">
+                <tr class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <th class="px-6 py-5">Asset</th>
+                    <th class="px-6 py-5">Type</th>
+                    <th class="px-6 py-5">Purchased</th>
+                    <th class="px-6 py-5">Condition</th>
+                    <th class="px-6 py-5">Status</th>
+                    <th class="px-6 py-5">AI decision</th>
+                    <th class="px-6 py-5">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for asset in assets %}
+                <tr class="border-t border-slate-100 hover:bg-slate-50">
+                    <td class="px-6 py-5">
+                        <a href="{% url 'asset_detail' asset.asset_id %}" class="group">
+                            <p class="font-black group-hover:text-emerald-700">{{ asset.device_name }}</p>
+                            <p class="mt-1 text-xs text-slate-400">{{ asset.asset_id }}</p>
+                        </a>
+                    </td>
+                    <td class="px-6 py-5 text-sm text-slate-500">{{ asset.device_type }}</td>
+                    <td class="px-6 py-5 text-sm text-slate-500">{{ asset.purchase_date|date:"d M Y" }}</td>
+                    <td class="px-6 py-5">
+                        <div class="flex items-center gap-3">
+                            <div class="h-2 w-20 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-emerald-500" style="width: {% widthratio asset.condition_score 10 100 %}%"></div></div>
+                            <span class="text-sm font-black">{{ asset.condition_score }}/10</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">{{ asset.operational_status }}</span></td>
+                    <td class="px-6 py-5"><span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{{ asset.ai_decision }}</span></td>
+                    <td class="px-6 py-5"><span class="text-sm font-black">{{ asset.ai_confidence|floatformat:0 }}%</span><p class="mt-1 text-[10px] text-slate-400">{{ asset.ai_model }}</p></td>
+                </tr>
+                <tr class="bg-slate-50/50">
+                    <td colspan="7" class="px-6 py-4">
+                        <div class="flex items-center justify-between gap-4">
+                            <details class="flex-1">
+                                <summary class="cursor-pointer text-xs font-black text-slate-500">View AI lifecycle rationale</summary>
+                                <div class="mt-3 rounded-2xl bg-white p-5 text-sm leading-7 text-slate-600">
+                                    <p class="mb-3"><b>AI source:</b> {{ asset.ai_source }}</p>
+                                    <div class="whitespace-pre-line">{{ asset.ai_recommendation }}</div>
+                                </div>
+                            </details>
+                            <a href="{% url 'asset_detail' asset.asset_id %}"
+                               class="flex-shrink-0 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-black text-emerald-700 hover:bg-emerald-100">
+                                View passport →
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="7" class="px-6 py-16 text-center"><div class="text-4xl">🔎</div><p class="mt-4 font-black">No matching assets</p><p class="mt-1 text-sm text-slate-400">Try changing your search or filters.</p></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

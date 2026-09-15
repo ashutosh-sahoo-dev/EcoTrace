@@ -1,0 +1,136 @@
+{% extends "lifecycle/base.html" %}
+{% block title %}EcoTrace — Sustainability Dashboard{% endblock %}
+
+{% block content %}
+<section class="mb-10 grid gap-7 lg:grid-cols-[1.5fr_1fr]">
+    <div class="pt-2">
+        <div class="mb-4 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-[11px] font-black uppercase tracking-[.18em] text-emerald-700">
+            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+            AI Sustainability Control Center
+        </div>
+        <h1 class="max-w-4xl text-4xl font-black leading-tight tracking-tight text-slate-950 md:text-6xl">
+            Every device has a lifecycle.
+            <span class="text-emerald-600">Make it count.</span>
+        </h1>
+        <p class="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
+            EcoTrace turns campus electronics into traceable digital lifecycle passports,
+            using responsible AI to support maintenance, repair and end-of-life decisions.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+            <a href="{% url 'add_asset' %}" class="rounded-2xl bg-slate-950 px-5 py-3 text-sm font-black text-white transition hover:-translate-y-0.5 hover:bg-slate-800">
+                Register hardware →
+            </a>
+            <a href="{% url 'responsible_ai' %}" class="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700 transition hover:bg-slate-50">
+                Explore governance
+            </a>
+        </div>
+    </div>
+
+    <div class="glass rounded-3xl p-7 shadow-soft">
+        <div class="flex items-start justify-between">
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-[.2em] text-slate-400">AI decision layer</p>
+                <h2 class="mt-1 text-2xl font-black text-slate-950">IBM BOB × Granite</h2>
+            </div>
+            <div class="rounded-2xl bg-slate-950 px-3 py-2 text-xs font-black text-white">
+                {% if granite_enabled %}LIVE{% else %}DEMO{% endif %}
+            </div>
+        </div>
+
+        <div class="mt-7 space-y-5">
+            <div class="flex gap-3">
+                <div class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
+                <div><p class="font-black">Lifecycle diagnosis</p><p class="text-sm text-slate-500">Assess condition and useful-life signals.</p></div>
+            </div>
+            <div class="flex gap-3">
+                <div class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
+                <div><p class="font-black">Predictive maintenance</p><p class="text-sm text-slate-500">Prioritize intervention before avoidable failure.</p></div>
+            </div>
+            <div class="flex gap-3">
+                <div class="mt-1 h-2.5 w-2.5 rounded-full bg-emerald-500"></div>
+                <div><p class="font-black">Repair vs recycle</p><p class="text-sm text-slate-500">Prefer responsible life extension where reasonable.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="glass rounded-3xl p-6 shadow-soft">
+        <div class="flex items-center justify-between"><span class="rounded-2xl bg-emerald-100 p-3 text-xl">🖥️</span><span class="text-[10px] font-black tracking-widest text-emerald-600">INVENTORY</span></div>
+        <p class="mt-5 text-sm font-bold text-slate-500">Total assets</p>
+        <p class="mt-1 text-4xl font-black text-slate-950">{{ total_assets }}</p>
+    </div>
+    <div class="glass rounded-3xl p-6 shadow-soft">
+        <div class="flex items-center justify-between"><span class="rounded-2xl bg-blue-100 p-3 text-xl">🔐</span><span class="text-[10px] font-black tracking-widest text-blue-600">ACTIVE</span></div>
+        <p class="mt-5 text-sm font-bold text-slate-500">Active passports</p>
+        <p class="mt-1 text-4xl font-black text-slate-950">{{ active_passports }}</p>
+    </div>
+    <div class="glass rounded-3xl p-6 shadow-soft">
+        <div class="flex items-center justify-between"><span class="rounded-2xl bg-amber-100 p-3 text-xl">🌱</span><span class="text-[10px] font-black tracking-widest text-amber-600">CARBON</span></div>
+        <p class="mt-5 text-sm font-bold text-slate-500">Carbon saved</p>
+        <p class="mt-1 text-4xl font-black text-slate-950">{{ total_carbon_offset }}</p>
+        <p class="mt-1 text-xs text-slate-400">kg CO₂e • illustrative estimate</p>
+    </div>
+    <div class="glass rounded-3xl p-6 shadow-soft">
+        <div class="flex items-center justify-between"><span class="rounded-2xl bg-purple-100 p-3 text-xl">♻️</span><span class="text-[10px] font-black tracking-widest text-purple-600">DIVERSION</span></div>
+        <p class="mt-5 text-sm font-bold text-slate-500">E-waste diverted</p>
+        <p class="mt-1 text-4xl font-black text-slate-950">{{ total_ewaste_diverted }}</p>
+        <p class="mt-1 text-xs text-slate-400">kg • illustrative estimate</p>
+    </div>
+</section>
+
+<section class="mt-8 grid gap-6 lg:grid-cols-3">
+    <div class="glass rounded-3xl p-7 shadow-soft lg:col-span-2">
+        <div class="flex items-end justify-between gap-5">
+            <div>
+                <p class="text-[10px] font-black uppercase tracking-[.2em] text-slate-400">Lifecycle health</p>
+                <h2 class="mt-1 text-2xl font-black">Campus device health</h2>
+            </div>
+            <div class="text-3xl font-black text-emerald-600">{{ lifecycle_health }}%</div>
+        </div>
+        <div class="mt-7 h-4 overflow-hidden rounded-full bg-slate-100">
+            <div class="h-full rounded-full bg-emerald-500" style="width: {{ lifecycle_health }}%"></div>
+        </div>
+        <div class="mt-7 grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Healthy</p><p class="mt-1 text-2xl font-black">{{ healthy_assets }}</p></div>
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Maintenance</p><p class="mt-1 text-2xl font-black">{{ maintenance_assets }}</p></div>
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Repair</p><p class="mt-1 text-2xl font-black">{{ repair_assets }}</p></div>
+            <div class="rounded-2xl bg-slate-50 p-4"><p class="text-xs text-slate-500">Recycle</p><p class="mt-1 text-2xl font-black">{{ recycling_assets }}</p></div>
+        </div>
+    </div>
+
+    <div class="rounded-3xl bg-slate-950 p-7 text-white shadow-xl">
+        <p class="text-[10px] font-black uppercase tracking-[.2em] text-emerald-400">SDG 12</p>
+        <h2 class="mt-1 text-2xl font-black">Impact engine</h2>
+        <div class="mt-7 space-y-6">
+            <div><div class="mb-2 flex justify-between text-sm"><span class="text-slate-400">Responsible lifecycle</span><span class="font-black">{{ lifecycle_health }}%</span></div><div class="h-2 rounded-full bg-slate-800"><div class="h-full rounded-full bg-emerald-500" style="width: {{ lifecycle_health }}%"></div></div></div>
+            <div><p class="font-black">Digital traceability</p><p class="mt-2 text-sm leading-6 text-slate-400">A lifecycle passport keeps device decisions visible, explainable and connected to sustainability outcomes.</p></div>
+            <div><p class="font-black">Human oversight</p><p class="mt-2 text-sm leading-6 text-slate-400">AI provides recommendations; physical retirement and recycling remain accountable operational decisions.</p></div>
+        </div>
+    </div>
+</section>
+
+<section class="mt-8 overflow-hidden rounded-3xl bg-white shadow-soft">
+    <div class="flex items-center justify-between border-b border-slate-100 px-7 py-6">
+        <div><p class="text-[10px] font-black uppercase tracking-[.2em] text-slate-400">Recent registrations</p><h2 class="mt-1 text-2xl font-black">Lifecycle passports</h2></div>
+        <a href="{% url 'asset_list' %}" class="text-sm font-black text-emerald-600 hover:text-emerald-700">View inventory →</a>
+    </div>
+    <div class="overflow-x-auto">
+        <table class="w-full min-w-[760px] text-left">
+            <thead><tr class="border-b border-slate-100 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400"><th class="px-7 py-4">Asset</th><th class="px-7 py-4">Type</th><th class="px-7 py-4">Condition</th><th class="px-7 py-4">AI decision</th></tr></thead>
+            <tbody>
+            {% for asset in recent_assets %}
+                <tr class="border-b border-slate-50 hover:bg-slate-50">
+                    <td class="px-7 py-4"><p class="font-black">{{ asset.device_name }}</p><p class="text-xs text-slate-400">{{ asset.asset_id }}</p></td>
+                    <td class="px-7 py-4 text-sm text-slate-500">{{ asset.device_type }}</td>
+                    <td class="px-7 py-4"><span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">{{ asset.condition_score }}/10</span></td>
+                    <td class="px-7 py-4"><span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">{{ asset.ai_decision }}</span></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="4" class="px-7 py-14 text-center text-sm text-slate-400">No assets registered yet. Start by creating the first lifecycle passport.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

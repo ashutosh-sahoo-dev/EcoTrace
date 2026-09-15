@@ -1,0 +1,248 @@
+{% extends "lifecycle/base.html" %}
+{% block title %}EcoTrace — {{ asset.asset_id }} Lifecycle Passport{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-5xl">
+
+    {# ── Breadcrumb ── #}
+    <nav class="mb-6 flex items-center gap-2 text-sm text-slate-400">
+        <a href="{% url 'dashboard' %}" class="hover:text-emerald-600">Dashboard</a>
+        <span>›</span>
+        <a href="{% url 'asset_list' %}" class="hover:text-emerald-600">Lifecycle Passports</a>
+        <span>›</span>
+        <span class="font-black text-slate-700">{{ asset.asset_id }}</span>
+    </nav>
+
+    {# ── Page header ── #}
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+            <div class="mb-3 inline-flex rounded-full bg-emerald-50 px-4 py-2 text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">
+                Lifecycle Passport
+            </div>
+            <h1 class="text-4xl font-black tracking-tight text-slate-950">{{ asset.device_name }}</h1>
+            <p class="mt-1 font-mono text-sm text-slate-400">{{ asset.asset_id }}</p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+            <span class="rounded-2xl border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600">
+                {{ asset.device_type }}
+            </span>
+            <span class="rounded-2xl
+                {% if asset.lifecycle_status == 'Healthy' %}bg-emerald-50 text-emerald-700
+                {% elif asset.lifecycle_status == 'Monitor' %}bg-amber-50 text-amber-700
+                {% elif asset.lifecycle_status == 'Recycled' %}bg-slate-100 text-slate-500
+                {% else %}bg-red-50 text-red-700{% endif %}
+                px-4 py-2 text-xs font-black">
+                {{ asset.lifecycle_status }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid gap-6 lg:grid-cols-[1fr_340px]">
+
+        {# ════════════════════ LEFT COLUMN ════════════════════ #}
+        <div class="space-y-6">
+
+            {# ── Asset details card ── #}
+            <section class="glass rounded-3xl p-7 shadow-soft">
+                <p class="mb-5 text-[10px] font-black uppercase tracking-[.2em] text-slate-400">Device information</p>
+                <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Asset ID</dt>
+                        <dd class="mt-1 font-mono font-black text-slate-900">{{ asset.asset_id }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Device type</dt>
+                        <dd class="mt-1 font-black text-slate-900">{{ asset.device_type }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Purchase date</dt>
+                        <dd class="mt-1 font-black text-slate-900">{{ asset.purchase_date|date:"d F Y" }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Operational status</dt>
+                        <dd class="mt-1">
+                            <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700">
+                                {{ asset.operational_status }}
+                            </span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Condition score</dt>
+                        <dd class="mt-2 flex items-center gap-3">
+                            <div class="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
+                                <div class="h-full rounded-full
+                                    {% if asset.condition_score >= 8 %}bg-emerald-500
+                                    {% elif asset.condition_score >= 5 %}bg-amber-400
+                                    {% else %}bg-red-400{% endif %}"
+                                    style="width: {% widthratio asset.condition_score 10 100 %}%">
+                                </div>
+                            </div>
+                            <span class="text-lg font-black text-slate-900">{{ asset.condition_score }}<span class="text-sm font-bold text-slate-400">/10</span></span>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-black text-slate-400">Registered</dt>
+                        <dd class="mt-1 text-sm text-slate-600">{{ asset.created_at|date:"d M Y, H:i" }}</dd>
+                    </div>
+                </dl>
+            </section>
+
+            {# ── AI recommendation card ── #}
+            <section class="rounded-3xl border border-slate-200 bg-white p-7 shadow-soft">
+                <div class="mb-1 flex items-center justify-between gap-4">
+                    <p class="text-[10px] font-black uppercase tracking-[.2em] text-slate-400">AI lifecycle assessment</p>
+                    <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+                        Decision support — not autonomous
+                    </span>
+                </div>
+                <p class="mb-5 text-xs leading-6 text-slate-500">
+                    This recommendation was generated by the EcoTrace AI engine as a decision-support output.
+                    It does not automatically trigger any physical action. All operational decisions remain the
+                    responsibility of the reviewing user.
+                </p>
+
+                <div class="mb-6 flex flex-wrap items-center gap-3">
+                    <span class="rounded-2xl
+                        {% if asset.ai_decision == 'CONTINUE' %}bg-emerald-100 text-emerald-800
+                        {% elif asset.ai_decision == 'MAINTAIN' %}bg-blue-100 text-blue-800
+                        {% elif asset.ai_decision == 'REPAIR' %}bg-amber-100 text-amber-800
+                        {% elif asset.ai_decision == 'RECYCLE' %}bg-red-100 text-red-700
+                        {% else %}bg-slate-100 text-slate-600{% endif %}
+                        px-4 py-2 text-sm font-black">
+                        AI recommendation: {{ asset.ai_decision }}
+                    </span>
+                    <span class="text-sm text-slate-500">
+                        Confidence:
+                        <span class="font-black
+                            {% if asset.ai_confidence >= 85 %}text-emerald-600
+                            {% elif asset.ai_confidence >= 70 %}text-amber-600
+                            {% else %}text-red-600{% endif %}">
+                            {{ asset.ai_confidence|floatformat:0 }}%
+                        </span>
+                    </span>
+                </div>
+
+                <div class="space-y-4 rounded-2xl bg-slate-50 p-5 text-sm leading-7 text-slate-700">
+                    <div class="whitespace-pre-line">{{ asset.ai_recommendation }}</div>
+                </div>
+
+                <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div class="rounded-2xl border border-slate-100 p-4">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">AI model</p>
+                        <p class="mt-1 text-sm font-black text-slate-800">{{ asset.ai_model }}</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-100 p-4">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">AI source</p>
+                        <p class="mt-1 text-sm font-black text-slate-800">{{ asset.ai_source }}</p>
+                    </div>
+                </div>
+            </section>
+
+            {# ── Sustainability impact card ── #}
+            {% with total_carbon=sustainability_logs|length %}
+            <section class="rounded-3xl border border-emerald-100 bg-emerald-50 p-7">
+                <p class="mb-5 text-[10px] font-black uppercase tracking-[.2em] text-emerald-700">Sustainability impact log</p>
+                {% if sustainability_logs %}
+                <div class="space-y-3">
+                    {% for log in sustainability_logs %}
+                    <div class="rounded-2xl bg-white p-4">
+                        <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm font-black text-slate-800">{{ log.action }}</p>
+                                {% if log.notes %}
+                                <p class="mt-1 text-xs leading-6 text-slate-500">{{ log.notes }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="flex flex-shrink-0 gap-4 text-right text-xs">
+                                {% if log.carbon_saved_kg %}
+                                <div>
+                                    <p class="font-black text-emerald-700">{{ log.carbon_saved_kg }} kg</p>
+                                    <p class="text-slate-400">CO₂e saved</p>
+                                </div>
+                                {% endif %}
+                                {% if log.ewaste_diverted_kg %}
+                                <div>
+                                    <p class="font-black text-purple-700">{{ log.ewaste_diverted_kg }} kg</p>
+                                    <p class="text-slate-400">e-waste diverted</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="mt-2 text-[10px] text-slate-400">{{ log.created_at|date:"d M Y, H:i" }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="mt-4 text-[10px] text-emerald-700">
+                    ✱ Carbon and e-waste figures are illustrative estimates for this educational prototype.
+                </p>
+                {% else %}
+                <p class="text-sm text-emerald-800">No sustainability log entries yet for this asset.</p>
+                {% endif %}
+            </section>
+            {% endwith %}
+
+        </div>{# end left column #}
+
+        {# ════════════════════ RIGHT COLUMN ════════════════════ #}
+        <div class="space-y-6">
+
+            {# ── Human review card ── #}
+            <section class="rounded-3xl bg-slate-950 p-7 text-white shadow-xl">
+                <p class="text-[10px] font-black uppercase tracking-[.2em] text-emerald-400">Human oversight</p>
+                <h2 class="mt-2 text-2xl font-black leading-tight">AI recommends.<br>Humans remain accountable.</h2>
+                <p class="mt-4 text-sm leading-7 text-slate-300">
+                    Review the AI recommendation on the left. Use the form below to record the
+                    operational decision made by the responsible user. This action will be logged
+                    in the lifecycle passport.
+                </p>
+
+                <form method="post" class="mt-7">
+                    {% csrf_token %}
+                    <label class="mb-2 block text-sm font-black text-slate-300">
+                        Update operational status
+                    </label>
+                    {{ form.operational_status }}
+                    {% for error in form.operational_status.errors %}
+                        <p class="mt-2 text-xs font-bold text-red-400">{{ error }}</p>
+                    {% endfor %}
+                    <p class="mt-3 text-xs leading-6 text-slate-500">
+                        Changing the status records your decision in the audit trail. Physical actions
+                        (repair handoff, recycling routing) remain your operational responsibility.
+                    </p>
+                    <button type="submit"
+                        class="mt-5 w-full rounded-2xl bg-emerald-600 px-5 py-3.5 text-sm font-black text-white shadow-lg shadow-emerald-600/20 transition hover:-translate-y-0.5 hover:bg-emerald-700">
+                        Record operational decision →
+                    </button>
+                </form>
+            </section>
+
+            {# ── Governance reminder card ── #}
+            <section class="rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
+                <p class="text-[10px] font-black uppercase tracking-[.18em] text-emerald-700">SDG 12 principle</p>
+                <p class="mt-3 text-sm leading-7 text-emerald-950">
+                    Prefer extending useful device life when repair or maintenance is technically reasonable.
+                    Recycle only after a human has confirmed end-of-life through this passport.
+                </p>
+                <a href="{% url 'responsible_ai' %}"
+                   class="mt-4 inline-block text-xs font-black text-emerald-700 hover:underline">
+                    View full AI governance →
+                </a>
+            </section>
+
+            {# ── Quick links ── #}
+            <div class="space-y-2">
+                <a href="{% url 'asset_list' %}"
+                   class="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-black text-slate-700 hover:bg-slate-50">
+                    ← All lifecycle passports
+                </a>
+                <a href="{% url 'add_asset' %}"
+                   class="flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm font-black text-slate-700 hover:bg-slate-50">
+                    + Register another asset
+                </a>
+            </div>
+
+        </div>{# end right column #}
+    </div>
+
+</div>
+{% endblock %}
